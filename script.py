@@ -87,20 +87,23 @@ for city in loc:
         'temp_max': 'max',
         'temp_min': 'min'})
     
-    df_grouped['min_avg'] = df_grouped['temp_min'].mean()
-    df_grouped['max_avg'] = df_grouped['temp_max'].mean()
 #####
 
-    for i, day in enumerate(df_grouped.index, start=1):
+    for i, day in enumerate(df_grouped.index, start=0):
         if i>4:
             break
         df_wide.loc[city, f'Min_{i}'] = df_grouped.loc[day, 'temp_min']
-        df_wide.loc[city, f'Max_{i}'] = df_grouped.loc[day, 'temp_max']
+        df_wide.loc[city, f'Max_{i}'] = df_grouped.loc[day, 'temp_max']   
 
-    # df_wide.loc[city, 'Min_Avg'] = df_grouped['min_avg']
-    # df_wide.loc[city, 'Max_Avg'] = df_grouped['max_avg']    
+#####
 
-
+df_wide = df_wide.drop(columns=['Min_0', 'Max_0'])
+df_wide = df_wide.iloc[:] - 273.15
 df_wide = df_wide.reset_index()
 df_wide = df_wide.rename({'index': 'City'}, axis='columns')
-df_wide
+df_wide['Min_Avg'] = df_wide[['Min_1', 'Min_2', 'Min_3', 'Min_4']].mean(axis=1).round(2)
+df_wide['Max_Avg'] = df_wide[['Max_1', 'Max_2', 'Max_3', 'Max_4']].mean(axis=1).round(2)
+
+
+df_wide.columns = df_wide.columns.str.replace('_', ' ')
+df_wide.to_csv('temp.csv', index=False, float_format='%.2f')
